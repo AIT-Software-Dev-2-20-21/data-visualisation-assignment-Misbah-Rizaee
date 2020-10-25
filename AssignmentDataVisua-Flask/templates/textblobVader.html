@@ -1,0 +1,91 @@
+{% extends 'partial/layout2.html' %}
+
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>results page</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/data.js"></script>
+    <script src="https://code.highcharts.com/modules/drilldown.js"></script>
+</head>
+<body>
+
+
+<div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+
+
+Positive: {{ pos }}
+Negative: {{ neg }}
+neutral : {{ neu }}
+
+
+</body>
+<script>
+
+$(function () {
+    // Create the chart
+    $('#container').highcharts({
+        chart: {
+            type: 'pie'
+        },
+        title: {
+            text: 'Browser market shares. November, 2013.'
+        },
+        subtitle: {
+            text: 'Click the slices to view versions. Source: netmarketshare.com.'
+        },
+        xAxis: {
+            showEmpty: false
+        },
+        yAxis: {
+            showEmpty: false
+        },
+        plotOptions: {
+            series: {
+                dataLabels: {
+                    enabled: true,
+                    format: '{point.name}: {point.y:.1f}%'
+                }
+            }
+        },
+
+        tooltip: {
+            headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+            pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.2f}%</b> of total<br/>'
+        },
+
+        series: [{
+            name: 'Brands',
+            colorByPoint: true,
+            data: [{
+                drilldown: 'ddneg',
+                y: {{ pos }}
+            },
+			{
+                drilldown: 'ddneg',
+                y: {{ neg }}
+            },
+			{
+                drilldown: 'ddneg',
+                y: {{ neu }}
+            }]
+        }],
+        drilldown: {
+            series: [{
+                type: 'column',
+                id: 'ddneg',
+                data: [10, 20, 30]
+            }]
+        }
+    });
+});
+
+
+</script>
+</html>
+//========================
+{% endblock %}

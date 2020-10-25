@@ -1,0 +1,30 @@
+{% extends 'partial/layout.html' %}
+
+{% block content %}
+
+    <style>
+    .btn-block{
+        background-color: Transparent;
+        border: 1px solid #17252a;
+        color: black;
+        padding: 15px 32px;
+        text-decoration: none;
+        font-size: 16px;
+        cursor: pointer;
+        margin-top:20px;
+	    margin-bottom:20px;}
+    .btn-block:hover{color: #FFF;}
+
+    </style>
+    <div class="container">
+        <div class="row">
+           <div class="col-sm-12 center">
+               <h1>Home Content</h1>
+               <a href="/textblobVader" style="text-decoration: none;"><button type="button" class="btn btn-primary btn-lg btn-block">Static Data Showcase</button></a>
+               <a href="/SingleTopicTopic" style="text-decoration: none;"><button type="button" class="btn btn-secondary btn-lg btn-block">Single Topic Live Tweet Sentiment Analysis</button></a>
+               <a href="/DualTopicLive" style="text-decoration: none;"><button type="button" class="btn btn-secondary btn-lg btn-block">Dual Topic Live Tweet Sentiment Analysis</button></a>
+           </div>
+        </div>
+    </div>
+
+{% endblock %}
