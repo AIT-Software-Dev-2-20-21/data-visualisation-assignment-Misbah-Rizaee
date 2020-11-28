@@ -11,14 +11,14 @@
     <title>Twitter Sentiment Analyzer</title>
   </head>
   <body>
-     <div class="jumbotron text-center" style="background-color: rgba(75, 192, 192, 0.7) ">
+     <div class="jumbotron text-center" style="background-color: rgb(39, 39, 39) ">
          <div class="row">
               <div class="col-sm-2 center">
 
               </div>
         <div class="col-sm-4 center"><br><br>
-             <h1 style="color:black;">Static Data Showcase</h1>
-             <h4 style="color:black;">All data is based around #trump</h4>
+             <h1 style="color:white;">Static Data Showcase</h1>
+             <h4 style="color:white;">All data is based around #trump</h4>
         </div>
         <div class="col-sm-4 center" style="margin-top:20px; margin-bottom:20px;">
             <img src  = "{{ url_for('static', filename='images/twitter-logo.png') }}" height="150px" alt="">
@@ -27,6 +27,7 @@
               </div>
         </div>
     </div>
+     {% include 'partial/navigation.html' %}
   {%  block content %}
   {%  endblock %}
 

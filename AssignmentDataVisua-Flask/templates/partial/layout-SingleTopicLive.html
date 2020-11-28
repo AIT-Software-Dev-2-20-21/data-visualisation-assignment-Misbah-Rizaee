@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <title>Twitter Sentiment Analyzer</title>
+  </head>
+  <body>
+     <div class="jumbotron text-center" style="background-color: rgb(39, 39, 39) ">
+         <div class="row">
+              <div class="col-sm-2 center">
+
+              </div>
+        <div class="col-sm-4 center"><br><br>
+             <h1 style="color:white;">Live Analysis</h1>
+             <h4 style="color:white;">Single Topic Charting and Drilldowns</h4>
+        </div>
+        <div class="col-sm-4 center" style="margin-top:20px; margin-bottom:20px;">
+            <img src  = "{{ url_for('static', filename='images/twitter-logo.png') }}" height="150px" alt="">
+        </div>
+               <div class="col-sm-2 center">
+              </div>
+        </div>
+    </div>
+     {% include 'partial/navigation.html' %}
+  {%  block content %}
+  {%  endblock %}
+
+  </body>
+</html>

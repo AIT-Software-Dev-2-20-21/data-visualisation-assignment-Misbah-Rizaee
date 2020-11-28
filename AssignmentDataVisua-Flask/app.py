@@ -1,13 +1,19 @@
 import os
+from _csv import reader
+from statistics import _sum
+
 import pandas as pd
 import json
 import tweepy as tp
 import csv
 import re
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify, make_response
 from twitter_auth import API_KEY, API_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import ast
+
+from tweepy import Stream
+from tweepy.streaming import StreamListener
 
 auth = tp.OAuthHandler(API_KEY, API_SECRET)
 auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
@@ -23,6 +29,9 @@ arrayTweets = []
 def home():
     return render_template('home.html')
 
+
+
+# ****************** static data showcase ******************
 
 @app.route('/textblobVader')
 def staticData():
@@ -149,7 +158,136 @@ def getStaticTweets():
     return render_template('textblobVader.html', neu=neu, pos=pos, neg=neg, tweetCount=tweetCount, posFollowers=posFollowers, neuFollowers=neuFollowers, negFollowers=negFollowers, negRetweets=negRetweets, posRetweets=posRetweets, neuRetweets=neuRetweets)
 
 
+
+
+# ****************** single Topic live ******************
+
+temp = [['Analysis', 'positive', 'neutral', 'negative'],
+            ['Polarity', '0', '0', '0']]
+
+@app.route('/SingleTopicTopic')
+def SingleTopicData():
+    if os.path.isfile('static/CSV/sample.json') is False:
+        with open('static/CSV/sample.json', 'w') as outfile:
+            json.dump(temp, outfile)
+
+    return render_template('singleTopicLive.html')
+
+
+class listener(StreamListener):
+    neu = []
+    neg = []
+    pos = []
+
+    neuFollowers = []
+    negFollowers = []
+    posFollowers = []
+
+    neuRetweets = []
+    negRetweets = []
+    posRetweets = []
+
+    def on_status(self, data):
+
+        self.dynamicChart(data)
+        sendData();
+
+        return True
+
+    @app.route('/SingleTopicTopic')
+    def dynamicChart(self, data, neu=neu, neuFollowers=neuFollowers, neuRetweets=neuRetweets, pos=pos,
+                     posFollowers=posFollowers, posRetweets=posRetweets, neg=neg, negFollowers=negFollowers,
+                     negRetweets=negRetweets):
+
+        analyser = SentimentIntensityAnalyzer()
+        score = analyser.polarity_scores(data.text)
+
+        if (score['compound'] == 0):
+            neu.append(1)
+            neuFollowers.append(data.user.followers_count)
+            neuRetweets.append(data.retweet_count)
+        elif (score['compound'] <= 1 and score['compound'] > 0):
+            pos.append(1)
+            posFollowers.append(data.user.followers_count)
+            posRetweets.append(data.retweet_count)
+        elif (score['compound'] < 0 and score['compound'] >= -1):
+            neg.append(1)
+            negFollowers.append(data.user.followers_count)
+            negRetweets.append(data.retweet_count)
+
+        # print("positive: " + str(pos) + " neutral: " + str(neu) + " negative: " + str(neg))
+        print("positive: " + str(sum(pos)) + " neutral: " + str(sum(neu)) + " negative: " + str(sum(neg)))
+        # print("positive Followers: " + str(posFollowers) + " neutral Followers: " + str(neuFollowers) + " negative Followers: " + str(negFollowers) + " negative Retweets: " + str(negRetweets) + " positive Retweets: " + str(posRetweets) + " neutral Retweets: " + str(neuRetweets))
+        print("positive Followers: " + str(sum(posFollowers)) + " neutral Followers: " + str(
+            sum(neuFollowers)) + " negative Followers: " + str(sum(negFollowers)) + " negative Retweets: " + str(
+            sum(negRetweets)) + " positive Retweets: " + str(sum(posRetweets)) + " neutral Retweets: " + str(
+            sum(neuRetweets)))
+        print("====================")
+
+        # mydict = {
+        #     "positive": str(sum(pos)),
+        #     "neutral": str(sum(neu)),
+        #     "negative": str(sum(neg)),
+        #     "positiveFollowers": str(sum(posFollowers)),
+        #     "neutralFollowers": str(sum(neuFollowers)),
+        #     "negativeFollowers": str(sum(negFollowers)),
+        #     "negativeRetweets": str(sum(negRetweets)),
+        #     "positiveRetweets": str(sum(posRetweets)),
+        #     "neutralRetweets": str(sum(neuRetweets))}
+
+        data = [['Analysis', 'positive', 'neutral', 'negative'],
+                ['Polarity', str(sum(pos)), str(sum(neu)), str(sum(neg))]]
+
+        file = open('static/CSV/singleStreamOutput.csv', 'w', newline='')
+
+        # writing the data into the CSV file
+        with file:
+            write = csv.writer(file)
+            write.writerows(data)
+
+        with open("static/CSV/sample.json", "w") as outfile:
+            json.dump(data, outfile)
+
+
+    def on_error(self, status):
+        print(status)
+
+twitterStream = Stream(auth, listener())
+
+@app.route('/sendData', methods=['GET', 'POST'])
+def sendData():
+    file = open("static/CSV/sample.json")
+    data = json.load(file)
+    file.close()
+
+    response = make_response(json.dumps(data))
+    response.content_type = 'application/json'
+    return "Analysis,Positive, Neutral, Negative \n "+ data[1][0] +","+ data[1][1] +","+ data[1][2] +","+ data[1][3]
+
+
+@app.route('/startSingleLiveStream', methods=['GET', 'POST'])
+def startStreaming():
+    query = request.form['query']
+    if request.method == 'POST':
+        if request.form['submit_button'] == 'Start Stream':
+            twitterStream.filter(track=[query])
+        elif request.form['submit_button'] == 'Stop Stream':
+            twitterStream.disconnect()
+        else:
+            return render_template('home.html')
+    elif request.method == 'GET':
+        print("No Post Back Call")
+    with open('static/CSV/sample.json', 'w') as outfile:
+        json.dump(temp, outfile)
+    return render_template('singleTopicLive.html')
+
+
+#==================================================
+
+
 if __name__ == '__main__':
     app.run()
 
-#======================================
+
+
+

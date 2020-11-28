@@ -1,0 +1,78 @@
+{% extends 'partial/layout-SingleTopicLive.html' %}
+
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>results page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/data.js"></script>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <form action="/startSingleLiveStream" method="post">
+        <div class="form-group">
+            <label for="topic">The Topic:</label>
+            <textarea class="form-control" rows="5" id="comment" name="query"></textarea>
+        </div>
+        <input  type="submit" name="submit_button" class="btn btn-primary btn-lg btn-block" value="Start Stream">
+        <input  type="submit" name="submit_button" class="btn btn-primary btn-lg btn-block" value="Stop Stream">
+    </form>
+
+</div>
+
+<div id="container"></div>
+<p> ===================================</p>
+
+</body>
+<script>
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const options = {
+        chart: {
+            type: 'column',
+            zoomType: 'xy'
+        },
+        title: {
+            text: 'Collecting Sentiment data Live'
+        },
+        yAxis: {
+            title: {
+                text: 'Tweets'
+            }
+        },
+        plotOptions: {
+            series: {
+                animation: false
+            }
+        }
+    };
+
+    options.data = {
+        csvURL: 'http://127.0.0.1:5000/sendData',
+        {#csvURL: 'http://127.0.0.1:5000/static/CSV/singleStreamOutput.csv',#}
+        enablePolling: true,
+        dataRefreshRate: 2
+     };
+    Highcharts.chart('container', options);
+});
+
+
+</script>
+</html>
+{% endblock %}
