@@ -14,10 +14,17 @@
 </head>
 <body>
 
+<div id="block_container" style="text-align:center; display: flex; justify-content: center;">
 
-<div id="container" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+    <div id="container" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+    <div id="containerTB" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+
+</div>
+
 <div style="padding-bottom: 50px"></div>
 <div id="container2" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+
+
 
 
 </body>
@@ -43,8 +50,8 @@ $(function () {
                 }
             }
         },
-        title: { text: 'Sentiment Data Collected on #trump.' },
-        subtitle: { text: 'Tweet Count: {{ tweetCount }}' },
+        title: { text: 'Using Vader + Drilldown' },
+        subtitle: { text: 'Sentiment Data Collected from {{ tweetCount }} tweets on #trump.' },
         xAxis: {
             type: 'category',
         },
@@ -60,7 +67,7 @@ $(function () {
         series: [{
             tooltip: {
                 headerFormat: '<span style="font-size:11px">Sentiment</span><br>',
-                pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y:.1f}%</b> of total<br/>'
+                pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y}</b> out of {{ tweetCount }}<br/>'
             },
             colorByPoint: true,
             data: [{ name: 'Positive', drilldown: 'ddneg', y: {{ pos }} },
@@ -103,6 +110,35 @@ $(function () {
                     { name: 'Negative', y: {{negRetweets}} },
                     { name: 'Neutral', y: {{neuRetweets}} }]
         }]
+    });
+    $('#containerTB').highcharts({
+        chart: {
+            type: 'pie',
+        },
+        title: { text: 'Using Textblob' },
+        subtitle: { text: 'Sentiment Data Collected from {{ tweetCount }} tweets on #trump.' },
+        xAxis: {
+            type: 'category',
+        },
+        yAxis: { title: { text: 'Exposure' } },
+        plotOptions: {
+            series: {
+                colorByPoint: true,
+                dataLabels: {
+                    enabled: false,
+                }
+            }
+        },
+        series: [{
+            tooltip: {
+                headerFormat: '<span style="font-size:11px">Sentiment</span><br>',
+                pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y}</b> out of {{ tweetCount }}<br/>'
+            },
+            colorByPoint: true,
+            data: [{ name: 'Positive', drilldown: 'ddneg', y: {{ posTB }} },
+			{ name: 'Negative', drilldown: 'ddneg', y: {{ negTB }} },
+			{ name: 'Neutral', drilldown: 'ddneg', y: {{ neuTB }} }]
+        }],
     });
 });
 

@@ -1,0 +1,104 @@
+{% extends 'partial/layout-DualTopicLive.html' %}
+
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>results page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/data.js"></script>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+
+<div class="container">
+    <form action="/startDualLiveStream" method="post">
+        <div class="form-group">
+            <label for="topic">Enter first query:</label>
+            <input class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" type="text" id="firstInput" name="firstQuery"><br>
+            <label for="topic">Enter second query:</label>
+            <input class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" type="text" id="secondInput" name="secondQuery"><br>
+        </div>
+        <input onclick="return myFunction()" type="submit" name="submit_button_dual" class="btn btn-primary btn-lg btn-block" value="Start Stream">
+        <input  type="submit" name="submit_button_dual" class="btn btn-primary btn-lg btn-block" value="Stop Stream">
+    </form>
+</div>
+<div style="padding-bottom: 50px"></div>
+
+<div id="block_container" style="text-align:center; display: flex; justify-content: center;">
+    <div id="containerFQ" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+    <div id="containerSQ" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+</div>
+
+</body>
+<script>
+function myFunction() {
+    var el1 = document.getElementById("firstInput");
+    var el2 = document.getElementById("secondInput");
+    globalFQ = el1.value;
+    globalSQ = el2.value;
+    console.log(globalFQ)
+    console.log(globalSQ)
+
+    if (el1 !== null && el1.value === "" || el2 !== null && el2.value === "")
+    {
+        alert("Please Enter 2 Queries");
+        return false;
+    }
+
+    const options = {
+        chart: {
+            type: 'column',
+            zoomType: 'xy'
+        },
+        yAxis: {
+            title: {
+                text: 'Tweets'
+            }
+        },
+        plotOptions: {
+            series: {
+                animation: false
+            }
+        }
+    };
+
+    options.data = {
+        csvURL: 'http://127.0.0.1:5000/FQsendData',
+        {#csvURL: 'http://127.0.0.1:5000/static/CSV/singleStreamOutput.csv',#}
+        enablePolling: true,
+        dataRefreshRate: 2
+     };
+    options.title = {
+        text: 'Collecting Sentiment data Live on: '+globalFQ
+     };
+    Highcharts.chart('containerFQ', options);
+
+    options.data = {
+        csvURL: 'http://127.0.0.1:5000/SQsendData',
+        {#csvURL: 'http://127.0.0.1:5000/static/CSV/singleStreamOutput.csv',#}
+        enablePolling: true,
+        dataRefreshRate: 2
+     };
+    options.title = {
+        text: 'Collecting Sentiment data Live on: '+globalSQ
+     };
+    Highcharts.chart('containerSQ', options);
+}
+
+</script>
+</html>
+{% endblock %}

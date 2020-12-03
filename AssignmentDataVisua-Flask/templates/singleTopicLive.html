@@ -27,29 +27,34 @@
     <form action="/startSingleLiveStream" method="post">
         <div class="form-group">
             <label for="topic">The Topic:</label>
-            <textarea class="form-control" rows="5" id="comment" name="query"></textarea>
+            <input class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" type="text" id="query" name="query"><br>
         </div>
-        <input  type="submit" name="submit_button" class="btn btn-primary btn-lg btn-block" value="Start Stream">
+        <input onclick="return myFunction()" type="submit" name="submit_button" class="btn btn-primary btn-lg btn-block" value="Start Stream">
         <input  type="submit" name="submit_button" class="btn btn-primary btn-lg btn-block" value="Stop Stream">
     </form>
-
 </div>
-
+<div style="padding-bottom: 50px"></div>
 <div id="container"></div>
-<p> ===================================</p>
 
 </body>
 <script>
 
+function myFunction() {
+    var el = document.getElementById("query");
+    globalQ = el.value;
+    if (el !== null && el.value === "")
+    {
+        alert("Please Enter a Query");
+        return false;
+    }
 
-document.addEventListener('DOMContentLoaded', () => {
     const options = {
         chart: {
             type: 'column',
             zoomType: 'xy'
         },
         title: {
-            text: 'Collecting Sentiment data Live'
+            text: 'Collecting Sentiment data Live on: '+globalQ
         },
         yAxis: {
             title: {
@@ -70,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dataRefreshRate: 2
      };
     Highcharts.chart('container', options);
-});
+}
 
 
 </script>
