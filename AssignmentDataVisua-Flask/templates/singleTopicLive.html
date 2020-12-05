@@ -14,6 +14,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="https://code.highcharts.com/modules/data.js"></script>
+    <script src="https://code.highcharts.com/modules/drilldown.js"></script>
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
@@ -36,6 +37,9 @@
 <div style="padding-bottom: 50px"></div>
 <div id="container"></div>
 
+<div style="padding-bottom: 50px"></div>
+<div id="container2"></div>
+
 </body>
 <script>
 
@@ -53,12 +57,9 @@ function myFunction() {
             type: 'column',
             zoomType: 'xy'
         },
-        title: {
-            text: 'Collecting Sentiment data Live on: '+globalQ
-        },
         yAxis: {
             title: {
-                text: 'Tweets'
+                text: 'Exposure '
             }
         },
         plotOptions: {
@@ -74,7 +75,23 @@ function myFunction() {
         enablePolling: true,
         dataRefreshRate: 2
      };
+    options.title = {
+        text: 'Number of tweets per specific sentiment on: '+globalQ
+    }
     Highcharts.chart('container', options);
+
+    options.data = {
+        csvURL: 'http://127.0.0.1:5000/sendDataNumOfFollowers',
+        {#csvURL: 'http://127.0.0.1:5000/static/CSV/singleStreamOutput.csv',#}
+        enablePolling: true,
+        dataRefreshRate: 2
+     };
+    options.title = {
+        text: 'Number of followers per specific sentiment on: '+globalQ
+    }
+    Highcharts.chart('container2', options);
+
+
 }
 
 

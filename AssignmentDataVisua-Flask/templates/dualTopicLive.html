@@ -43,6 +43,15 @@
     <div id="containerSQ" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
 </div>
 
+<div style="padding-bottom: 50px"></div>
+
+<div id="block_container" style="text-align:center; display: flex; justify-content: center;">
+    <div id="containerFQNumOfFol" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+    <div id="containerSQNumOfFol" style="min-width: 310px; height: 400px; margin: 0 auto;"></div>
+</div>
+
+<div style="padding-bottom: 50px"></div>
+
 </body>
 <script>
 function myFunction() {
@@ -66,7 +75,7 @@ function myFunction() {
         },
         yAxis: {
             title: {
-                text: 'Tweets'
+                text: 'Exposure'
             }
         },
         plotOptions: {
@@ -83,7 +92,7 @@ function myFunction() {
         dataRefreshRate: 2
      };
     options.title = {
-        text: 'Collecting Sentiment data Live on: '+globalFQ
+        text: 'Number of tweets per specific sentiment on: '+globalFQ
      };
     Highcharts.chart('containerFQ', options);
 
@@ -94,9 +103,31 @@ function myFunction() {
         dataRefreshRate: 2
      };
     options.title = {
-        text: 'Collecting Sentiment data Live on: '+globalSQ
+        text: 'Number of tweets per specific sentiment on: '+globalSQ
      };
     Highcharts.chart('containerSQ', options);
+
+    options.data = {
+        csvURL: 'http://127.0.0.1:5000/FQsendDataNumOfFol',
+        {#csvURL: 'http://127.0.0.1:5000/static/CSV/singleStreamOutput.csv',#}
+        enablePolling: true,
+        dataRefreshRate: 2
+     };
+    options.title = {
+        text: 'Number of followers per specific sentiment on: '+globalFQ
+     };
+    Highcharts.chart('containerFQNumOfFol', options);
+
+    options.data = {
+        csvURL: 'http://127.0.0.1:5000/SQsendDataNumOfFol',
+        {#csvURL: 'http://127.0.0.1:5000/static/CSV/singleStreamOutput.csv',#}
+        enablePolling: true,
+        dataRefreshRate: 2
+     };
+    options.title = {
+        text: 'Number of followers per specific sentiment on: '+globalSQ
+     };
+    Highcharts.chart('containerSQNumOfFol', options);
 }
 
 </script>

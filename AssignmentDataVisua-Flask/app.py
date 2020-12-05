@@ -62,7 +62,6 @@ def getStaticTweets():
 
         blob = TextBlob(tweet.text)
         polarity = blob.sentiment.polarity
-        print(polarity)
 
         if (polarity == 0):
             neuTB += 1
@@ -73,7 +72,6 @@ def getStaticTweets():
 
         analyser = SentimentIntensityAnalyzer()
         score = analyser.polarity_scores(tweet.text)
-        # print(score['compound'])
 
         if (score['compound'] == 0):
             neu += 1
@@ -95,15 +93,8 @@ def getStaticTweets():
 
 
 # ****************** single Topic live ******************
-
-temp = [['Analysis', 'positive', 'neutral', 'negative'],
-            ['Polarity', '0', '0', '0']]
-
 @app.route('/SingleTopicTopic')
 def SingleTopicData():
-    with open('static/CSV/sample.json', 'w') as outfile:
-        json.dump(temp, outfile)
-
     return render_template('singleTopicLive.html')
 
 
@@ -111,25 +102,19 @@ neu = []
 neg = []
 pos = []
 
+neuFollowers = []
+negFollowers = []
+posFollowers = []
+
 
 class listener(StreamListener):
-    # neu = []
-    # neg = []
-    # pos = []
-
-    neuFollowers = []
-    negFollowers = []
-    posFollowers = []
-
     neuRetweets = []
     negRetweets = []
     posRetweets = []
 
     def on_status(self, data):
-
         self.dynamicChart(data)
         sendData();
-
         return True
 
     @app.route('/SingleTopicTopic')
@@ -148,10 +133,8 @@ class listener(StreamListener):
         if (not data.retweeted) and ('RT @' not in data.text):
             if firstSearch != None and secondSearch != None:
                 if firstSearch in text:
-                    print('*****' + firstSearch + '*****')
                     DualTopicAnalysis(data, firstSearch)
                 elif secondSearch in text:
-                    print('*****' + secondSearch + '*****')
                     DualTopicAnalysis(data, secondSearch)
         else:
             if (score['compound'] == 0):
@@ -167,18 +150,17 @@ class listener(StreamListener):
                 negFollowers.append(data.user.followers_count)
                 negRetweets.append(data.retweet_count)
 
-            # print("positive: " + str(sum(pos)) + " neutral: " + str(sum(neu)) + " negative: " + str(sum(neg)))
-            # print("positive Followers: " + str(sum(posFollowers)) + " neutral Followers: " + str(
-            #     sum(neuFollowers)) + " negative Followers: " + str(sum(negFollowers)) + " negative Retweets: " + str(
-            #     sum(negRetweets)) + " positive Retweets: " + str(sum(posRetweets)) + " neutral Retweets: " + str(
-            #     sum(neuRetweets)))
-            # print("====================")
-
             data = [['Analysis', 'positive', 'neutral', 'negative'],
-                    ['Polarity', str(sum(pos)), str(sum(neu)), str(sum(neg))]]
+                    ['Number Of Tweets', str(sum(pos)), str(sum(neu)), str(sum(neg))]]
 
             with open("static/CSV/sample.json", "w") as outfile:
                 json.dump(data, outfile)
+
+            dataNumFol = [['Analysis', 'positive', 'neutral', 'negative'],
+                    ['Number Of Followers', str(sum(posFollowers)), str(sum(neuFollowers)), str(sum(negFollowers))]]
+
+            with open("static/CSV/sampleNumFol.json", "w") as outfile:
+                json.dump(dataNumFol, outfile)
 
     def on_error(self, status):
         print(status)
@@ -195,7 +177,18 @@ def sendData():
 
     response = make_response(json.dumps(data))
     response.content_type = 'application/json'
-    return "Analysis,Positive, Neutral, Negative \n "+ data[1][0] +","+ data[1][1] +","+ data[1][2] +","+ data[1][3]
+    return "Analysis,Positive, Neutral, Negative \n Number Of Tweets,"+ data[1][1] +","+ data[1][2] +","+ data[1][3]
+
+
+@app.route('/sendDataNumOfFollowers', methods=['GET', 'POST'])
+def sendDataNumOfFollowers():
+    file = open("static/CSV/sampleNumFol.json")
+    data = json.load(file)
+    file.close()
+
+    response = make_response(json.dumps(data))
+    response.content_type = 'application/json'
+    return "Analysis,Positive, Neutral, Negative \n Number Of Followers,"+ data[1][1] +","+ data[1][2] +","+ data[1][3]
 
 
 @app.route('/startSingleLiveStream', methods=['GET', 'POST'])
@@ -237,12 +230,20 @@ def startDualStreaming():
 
     return '', 204
 
+
 DTneuFQ = []
 DTneuSQ = []
 DTnegFQ = []
 DTnegSQ = []
 DTposFQ = []
 DTposSQ = []
+DTneuFollowersFQ = []
+DTposFollowersFQ = []
+DTnegFollowersFQ = []
+DTneuFollowersSQ = []
+DTposFollowersSQ = []
+DTnegFollowersSQ = []
+
 
 def clearArrays():
     neu.clear()
@@ -254,13 +255,18 @@ def clearArrays():
     DTnegSQ.clear()
     DTposFQ.clear()
     DTposSQ.clear()
+    neuFollowers.clear()
+    negFollowers.clear()
+    posFollowers.clear()
+    DTneuFollowersFQ.clear()
+    DTposFollowersFQ.clear()
+    DTnegFollowersFQ.clear()
+    DTneuFollowersSQ.clear()
+    DTposFollowersSQ.clear()
+    DTnegFollowersSQ.clear()
 
 
 def DualTopicAnalysis(data, query):
-
-
-    print(data.text)
-
     analyser = SentimentIntensityAnalyzer()
     score = analyser.polarity_scores(data.text)
 
@@ -268,34 +274,50 @@ def DualTopicAnalysis(data, query):
     secondSearch = request.form.get('secondQuery')
 
     if query is firstSearch:
-        print("first 11111111111111111111")
         if (score['compound'] == 0):
             DTneuFQ.append(1)
+            DTneuFollowersFQ.append(data.user.followers_count)
         elif (score['compound'] <= 1 and score['compound'] > 0):
             DTposFQ.append(1)
+            DTposFollowersFQ.append(data.user.followers_count)
         elif (score['compound'] < 0 and score['compound'] >= -1):
             DTnegFQ.append(1)
+            DTnegFollowersFQ.append(data.user.followers_count)
 
         data = [['Analysis', 'positive', 'neutral', 'negative'],
-                ['Polarity', str(sum(DTposFQ)), str(sum(DTneuFQ)), str(sum(DTnegFQ))]]
+                ['Number Of Tweets', str(sum(DTposFQ)), str(sum(DTneuFQ)), str(sum(DTnegFQ))]]
 
         with open("static/CSV/dualFirstQuery.json", "w") as outfile:
             json.dump(data, outfile)
 
+        dataNumFol = [['Analysis', 'positive', 'neutral', 'negative'],
+                      ['Number Of Followers', str(sum(DTposFollowersFQ)), str(sum(DTneuFollowersFQ)), str(sum(DTnegFollowersFQ))]]
+
+        with open("static/CSV/dualFirstQueryNumFol.json", "w") as outfile:
+            json.dump(dataNumFol, outfile)
+
     elif query is secondSearch:
-        print("first 22222222222222222222222")
         if (score['compound'] == 0):
             DTneuSQ.append(1)
+            DTneuFollowersSQ.append(data.user.followers_count)
         elif (score['compound'] <= 1 and score['compound'] > 0):
             DTposSQ.append(1)
+            DTposFollowersSQ.append(data.user.followers_count)
         elif (score['compound'] < 0 and score['compound'] >= -1):
             DTnegSQ.append(1)
+            DTnegFollowersSQ.append(data.user.followers_count)
 
         data = [['Analysis', 'positive', 'neutral', 'negative'],
-                ['Polarity', str(sum(DTposSQ)), str(sum(DTneuSQ)), str(sum(DTnegSQ))]]
+                ['Number Of Tweets', str(sum(DTposSQ)), str(sum(DTneuSQ)), str(sum(DTnegSQ))]]
 
         with open("static/CSV/dualSecondQuery.json", "w") as outfile:
             json.dump(data, outfile)
+
+        dataNumFol = [['Analysis', 'positive', 'neutral', 'negative'],
+                      ['Number Of Followers', str(sum(DTposFollowersSQ)), str(sum(DTneuFollowersSQ)), str(sum(DTnegFollowersSQ))]]
+
+        with open("static/CSV/dualSecondQueryNumFol.json", "w") as outfile:
+            json.dump(dataNumFol, outfile)
 
 
 @app.route('/FQsendData', methods=['GET', 'POST'])
@@ -306,7 +328,7 @@ def FQsendData():
 
     response = make_response(json.dumps(data))
     response.content_type = 'application/json'
-    return "Analysis,Positive, Neutral, Negative \n "+ data[1][0] +","+ data[1][1] +","+ data[1][2] +","+ data[1][3]
+    return "Analysis,Positive, Neutral, Negative \n Number Of Tweets,"+ data[1][1] +","+ data[1][2] +","+ data[1][3]
 
 
 @app.route('/SQsendData', methods=['GET', 'POST'])
@@ -317,12 +339,29 @@ def SQsendData():
 
     response = make_response(json.dumps(data))
     response.content_type = 'application/json'
-    return "Analysis,Positive, Neutral, Negative \n "+ data[1][0] +","+ data[1][1] +","+ data[1][2] +","+ data[1][3]
+    return "Analysis,Positive, Neutral, Negative \n Number Of Tweets,"+ data[1][1] +","+ data[1][2] +","+ data[1][3]
 
 
+@app.route('/FQsendDataNumOfFol', methods=['GET', 'POST'])
+def FQsendDataNumOfFol():
+    file = open("static/CSV/dualFirstQueryNumFol.json")
+    data = json.load(file)
+    file.close()
+
+    response = make_response(json.dumps(data))
+    response.content_type = 'application/json'
+    return "Analysis,Positive, Neutral, Negative \n Number Of Followers,"+ data[1][1] +","+ data[1][2] +","+ data[1][3]
 
 
-#================================
+@app.route('/SQsendDataNumOfFol', methods=['GET', 'POST'])
+def SQsendDataNumOfFol():
+    file = open("static/CSV/dualSecondQueryNumFol.json")
+    data = json.load(file)
+    file.close()
+
+    response = make_response(json.dumps(data))
+    response.content_type = 'application/json'
+    return "Analysis,Positive, Neutral, Negative \n Number Of Followers,"+ data[1][1] +","+ data[1][2] +","+ data[1][3]
 
 
 if __name__ == '__main__':
